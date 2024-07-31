@@ -12,7 +12,8 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Slide from "@mui/material/Slide";
 import axios from "axios";
-import Swal from 'sweetalert2'
+import Swal from "sweetalert2";
+import LinearProgress from "@mui/material/LinearProgress";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -21,14 +22,24 @@ const SignUP = ({ open, setOpen }) => {
   const [showPassword, setShowPassword] = React.useState(false);
   const [showPasswordCnf, setShowPasswordCnf] = React.useState(false);
   const [updatedFormData, setUpdateFormData] = useState({});
-  const [error, setError] = useState("")
+  const [error, setError] = useState("");
+  const [loader, setLoader] = useState(false);
 
   const apiUrl = process.env.REACT_APP_MAIN_URL;
 
   const handleClose = () => {
     setOpen(false);
+    setUpdateFormData({
+      firstName: "",
+      lastName: "",
+      userName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    });
+    setError(null);
   };
-  
+
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
@@ -42,34 +53,36 @@ const SignUP = ({ open, setOpen }) => {
     setUpdateFormData({ ...updatedFormData, [name]: value });
   };
 
-  const signUp = async (e)=>{
-    e.preventDefault()
+  const signUp = async (e) => {
+    e.preventDefault();
+    setLoader(true)
+    await axios
+      .post(`${apiUrl}/signup`, updatedFormData)
+      .then((res) => {
+        setLoader(false)
+        setUpdateFormData({
+          firstName: "",
+          lastName: "",
+          userName: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+        });
+        setError(null);
+        Swal.fire({
+          title: "Good job",
+          text: "SignUp successfully",
+          icon: "success",
+        });
 
-    await axios.post(`${apiUrl}/signup`, updatedFormData) 
-    .then(res=>{
-    setUpdateFormData({
-        firstName:"",
-        lastName:"",
-        userName:"",
-        email:"",
-        password:"",
-        confirmPassword:"",
-    })
-    setError(null)
-    Swal.fire({
-        title: "Good job",
-        text: "SignUp successfully",
-        icon: "success"
+        setOpen(false);
+      })
+      .catch((err) => {
+        setLoader(false)
+        setError(err.response.data.message);
+        console.log(err.response.data.message);
       });
-    setOpen(false);
-    })
-    .catch(err=>{
-      setError(err.response.data.message)
-      console.log(err.response.data.message)
-    })
-
-    
-  }
+  };
 
   return (
     <div>
@@ -90,7 +103,7 @@ const SignUP = ({ open, setOpen }) => {
                 variant="standard"
                 sx={{ width: "100%" }}
                 value={updatedFormData.firstName}
-                onChange={(e)=>profileFormData("firstName", e.target.value)}
+                onChange={(e) => profileFormData("firstName", e.target.value)}
               />
               <TextField
                 id="outlined-basic"
@@ -98,7 +111,7 @@ const SignUP = ({ open, setOpen }) => {
                 variant="standard"
                 sx={{ width: "100%" }}
                 value={updatedFormData.lastName}
-                onChange={(e)=>profileFormData("lastName", e.target.value)}
+                onChange={(e) => profileFormData("lastName", e.target.value)}
               />
               <TextField
                 id="outlined-basic"
@@ -106,7 +119,7 @@ const SignUP = ({ open, setOpen }) => {
                 variant="standard"
                 sx={{ width: "100%" }}
                 value={updatedFormData.userName}
-                onChange={(e)=>profileFormData("userName", e.target.value)}
+                onChange={(e) => profileFormData("userName", e.target.value)}
               />
               <TextField
                 id="outlined-basic"
@@ -115,7 +128,7 @@ const SignUP = ({ open, setOpen }) => {
                 variant="standard"
                 sx={{ width: "100%" }}
                 value={updatedFormData.email}
-                onChange={(e)=>profileFormData("email", e.target.value)}
+                onChange={(e) => profileFormData("email", e.target.value)}
               />
               <Input
                 id="standard-adornment-password"
@@ -123,7 +136,7 @@ const SignUP = ({ open, setOpen }) => {
                 type={showPassword ? "text" : "password"}
                 placeholder="enter your password"
                 value={updatedFormData.password}
-                onChange={(e)=>profileFormData("password", e.target.value)}
+                onChange={(e) => profileFormData("password", e.target.value)}
                 endAdornment={
                   <InputAdornment position="end">
                     <IconButton
@@ -142,7 +155,9 @@ const SignUP = ({ open, setOpen }) => {
                 type={showPasswordCnf ? "text" : "password"}
                 placeholder="enter your confirmPassword"
                 value={updatedFormData.confirmPassword}
-                onChange={(e)=>profileFormData("confirmPassword", e.target.value)}
+                onChange={(e) =>
+                  profileFormData("confirmPassword", e.target.value)
+                }
                 endAdornment={
                   <InputAdornment position="end">
                     <IconButton
@@ -158,13 +173,15 @@ const SignUP = ({ open, setOpen }) => {
             </div>
           </DialogContentText>
         </DialogContent>
-        {     
-            error && <p className="text-red-600 px-5" > {error}</p>
-        }
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={signUp}>Sign Up</Button>
-        </DialogActions>
+        {error && <p className="text-red-600 px-5"> {error}</p>}
+        {loader ? (
+          <LinearProgress />
+        ) : (
+            <DialogActions>
+            <Button onClick={handleClose}>Cancel</Button>
+            <Button onClick={signUp}>Sign Up</Button>
+          </DialogActions>
+        )}
       </Dialog>
     </div>
   );
