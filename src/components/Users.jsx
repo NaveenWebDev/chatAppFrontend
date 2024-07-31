@@ -6,7 +6,7 @@ import InputBase from "@mui/material/InputBase";
 import axios from "axios"
 import {GlobalUserData} from "../App"
 
-const Users = ({getUserDataForChatById}) => {
+const Users = ({getUserDataForChatById, receiveChats}) => {
 
   const apiUrl = process.env.REACT_APP_MAIN_URL;
   const [searchQuery, setSearchQuery] = useState("all")
@@ -54,7 +54,7 @@ const Users = ({getUserDataForChatById}) => {
 
       { chatUsers.map((user, i)=>(
         userobject?.id === user?.id? null :
-      <div key={user?.id} className="flex justify-between items-center bg-gray-500 p-2 m-3 rounded-md cursor-pointer" onClick={()=>getUserDataForChatById(user?.id)}>
+      <div key={user?.id} className="flex justify-between items-center bg-gray-500 p-2 m-3 rounded-md cursor-pointer" onClick={()=>{getUserDataForChatById(user?.id) ; receiveChats()} }>
 
         <div className="w-[15%]">
           <Avatar

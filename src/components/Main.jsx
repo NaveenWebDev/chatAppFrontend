@@ -20,8 +20,31 @@ const Main = () => {
   const [receivedChats, setReceivedChats] = useState([]);
   const [socketData, setSocketData] = useState("")
   const chatEndRef = useRef(null);
+  const socketRef = useRef();
 
-  const socket = useMemo(() => io(`http://localhost:4000`), [])
+useEffect(() => {
+    // Initialize socket connection
+    socketRef.current = io(`http://localhost:4000`, {
+      credentials: true,
+    });
+
+    socketRef.current.on("connect", () => {
+      console.log("Socket connected: ", socketRef.current.id);
+    });
+
+    socketRef.current.on("message", (data) => {
+      setSocketData(data);
+    });
+
+    socketRef.current.on("disconnect", () => {
+      console.log("Socket disconnected");
+    });
+
+    return () => {
+      // Clean up socket connection on component unmount
+      socketRef.current.disconnect();
+    };
+  }, []);
   
   const logout = () => {
     localStorage.removeItem("token");
@@ -61,45 +84,45 @@ const Main = () => {
 
     await axios.post(`${apiUrl}/createChat`, payload)
       .then((res)=>{
+        // socket.emit("message", myMessage)
+        socketRef.current.emit("message", myMessage);
         console.log("message send")
-        socket.emit("message", myMessage)
         setMyMessage("")
+        receiveChats()
       })
       .catch((err)=>{
         console.log(err)
       })
   }
 
+  useEffect(()=>{
+    scrollToBottom()
+  },[socketData , receivedChats, myMessage])
   // ==================================receive chats datas ================================
 
   const receiveChats = async ()=>{
     await axios.get(`${apiUrl}/receiveChats/userId=${userobject?.id}/receiverId=${chatId}`,)
     .then((res)=>{
-      console.log("message received")
       setReceivedChats(res?.data?.result)
     })
     .catch((err)=>{
       console.log(err)
     })
   }
+  
 
-  useEffect(()=>{
-    receiveChats()
-},[chatId, myMessage, socketData])
+// useEffect(() => {
+//   socket.on("message",(data) => {
+//     setSocketData(data)
+//   });
+//   return () => {
+//     socket.disconnect();
+//   };
+// }, []);
 
-  useEffect(()=>{
-    scrollToBottom()
-},[myMessage, socketData , receivedChats])
-
-
-useEffect(() => {
-  socket.on("message",(data) => {
-    setSocketData(data)
-  });
-  return () => {
-    socket.disconnect();
-  };
-}, []);
+useEffect(()=>{
+  receiveChats()
+},[socketData, chatId])
 
 
   return (
@@ -107,7 +130,7 @@ useEffect(() => {
       <div className="max-w-[1200px] w-[90%] m-auto">
         <div className="flex justify-between h-screen border overflow-hidden rounded-lg">
           <div className="h-full w-[30%]">
-            <Users getUserDataForChatById={getUserDataForChatById} />
+            <Users getUserDataForChatById={getUserDataForChatById} receiveChats={receiveChats} />
           </div>
 
           {chatId ? (
