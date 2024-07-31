@@ -6,27 +6,18 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import TextField from "@mui/material/TextField";
 import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import Slide from '@mui/material/Slide';
 
-const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
-  });
+import SignUP from "./SignUP";
 
 const Login = () => {
+  
   const [showPassword, setShowPassword] = React.useState(false);
   const [showPasswordCnf, setShowPasswordCnf] = React.useState(false);
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
   };
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -86,64 +77,8 @@ const Login = () => {
 
           </div>
         </div>
+            <SignUP open={open} setOpen={setOpen} />
       </div>
-      <Dialog
-        open={open}
-        TransitionComponent={Transition}
-        keepMounted
-        onClose={handleClose}
-        aria-describedby="alert-dialog-slide-description"
-      >
-        <DialogContent>
-          <DialogContentText id="alert-dialog-slide-description">
-                <h2 className="text-3xl font-bold" >Sign Up</h2>
-                  <div className="mt-5 flex flex-col gap-2">
-          <TextField id="outlined-basic" label="firstName" variant="standard" sx={{width:"100%"}} />
-          <TextField id="outlined-basic" label="lastName" variant="standard" sx={{width:"100%"}} />
-          <TextField id="outlined-basic" label="userName" variant="standard" sx={{width:"100%"}} />
-          <TextField id="outlined-basic" type="email" label="email" variant="standard" sx={{width:"100%"}} />
-          <Input
-                  id="standard-adornment-password"
-                  sx={{padding:"0.5rem", width:"100%"}}
-                  type={showPassword ? "text" : "password"}
-                  placeholder="enter your password"
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                />
-                 <Input
-                  id="standard-adornment-password"
-                  sx={{padding:"0.5rem", width:"100%"}}
-                  type={showPasswordCnf ? "text" : "password"}
-                  placeholder="enter your conformPassword"
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPasswordCnf}
-                        onMouseDown={handleMouseDownPasswordCnf}
-                      >
-                        {showPasswordCnf ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                />
-                  </div>
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleClose}>Sign Up</Button>
-        </DialogActions>
-      </Dialog>
     </div>
   );
 };
