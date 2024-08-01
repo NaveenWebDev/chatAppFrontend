@@ -7,7 +7,8 @@ import axios from "axios";
 import SendIcon from "@mui/icons-material/Send";
 import Button from "@mui/material/Button";
 import {io} from "socket.io-client";
-
+import SpeedDialIcon from '@mui/material/SpeedDialIcon';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const Main = () => {
   const apiUrl = process.env.REACT_APP_MAIN_URL;
@@ -21,9 +22,11 @@ const Main = () => {
   const [socketData, setSocketData] = useState("")
   const chatEndRef = useRef(null);
   const socketRef = useRef();
+  const [loader, setLoader] = useState(false)
+
 
 useEffect(() => {
-    // Initialize socket connection
+    // socket connection
     socketRef.current = io(`http://localhost:4000`, {
       credentials: true,
     });
@@ -41,7 +44,6 @@ useEffect(() => {
     });
 
     return () => {
-      // Clean up socket connection on component unmount
       socketRef.current.disconnect();
     };
   }, []);
@@ -71,7 +73,7 @@ useEffect(() => {
 
   const createChat = async ()=>{
 
-    if(myMessage === ""){
+    if(myMessage === "" && fileUrl === ""){
       return
     }
 
@@ -88,6 +90,7 @@ useEffect(() => {
         socketRef.current.emit("message", myMessage);
         console.log("message send")
         setMyMessage("")
+        setFileUrl("")
         receiveChats()
       })
       .catch((err)=>{
@@ -109,20 +112,34 @@ useEffect(() => {
       console.log(err)
     })
   }
-  
-
-// useEffect(() => {
-//   socket.on("message",(data) => {
-//     setSocketData(data)
-//   });
-//   return () => {
-//     socket.disconnect();
-//   };
-// }, []);
 
 useEffect(()=>{
   receiveChats()
 },[socketData, chatId])
+
+
+  const uploadFile = async (e)=>{
+    const payload = {
+      imageFile:e.target.files[0]
+    }
+    setLoader(true)
+    await axios.post(`${apiUrl}/imageUpload`, payload, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }) 
+      .then((res)=>{
+        console.log(res?.data?.result)
+        setFileUrl(res?.data?.result)
+        setLoader(false)
+      })
+      .catch((err)=>{
+        console.log(err);
+      })
+
+  }
+
+  console.log(fileUrl)
 
 
   return (
@@ -157,16 +174,18 @@ useEffect(()=>{
                   <img
                     src={val?.imageUrl}
                     alt=""
-                    className="w-[40%]"
+                    className="w-[40%] mt-2"
                   />
+
                   <p className={`bg-gray-600 w-[40%] p-3 rounded-md ${val?.userId === userobject?.id ? "bg-gray-800" : null} `}>{val?.chat}
+
                   <div ref={chatEndRef} />
                   </p>
                   </span>
                   ))
                 }
                 </div>
-                <div className="h-[10%] w-full flex bg-gray-500">
+                <div className="h-[10%] w-full flex items-center bg-gray-500">
                   <input
                     type="text"
                     placeholder="enter your message"
@@ -174,9 +193,17 @@ useEffect(()=>{
                     value={myMessage}
                     onChange={(e)=>setMyMessage(e.target.value)}
                   />
-                  <Button variant="contained" endIcon={<SendIcon />} onClick={createChat}>
+                  <span className="bg-[#1976D2] mx-1 rounded-full cursor-pointer grid place-items-center h-[50px] w-[70px] relative text-white">
+                    <input type="file" name="file" className="border h-full w-full absolute rounded-full opacity-0 cursor-pointer" onChange={(e)=>uploadFile(e)}   />
+                    <SpeedDialIcon className="cursor-pointer" />
+                  </span>
+                  {
+                    loader? <CircularProgress sx={{color:"white"}} /> :
+                  <Button variant="contained" endIcon={<SendIcon />} className="self-stretch" onClick={createChat}>
                     Send
                   </Button>
+                  }
+
                 </div>
               </div>
             </div>
