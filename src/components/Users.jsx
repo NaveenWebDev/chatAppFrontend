@@ -5,6 +5,7 @@ import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
 import axios from "axios"
 import {GlobalUserData} from "../App"
+import ApiConnector from "../services/ApiConnector";
 
 const Users = ({getUserDataForChatById, receiveChats}) => {
 
@@ -15,7 +16,7 @@ const Users = ({getUserDataForChatById, receiveChats}) => {
   const {userobject} = useContext(GlobalUserData);
 
   const getUserDataForChat = async ()=>{
-    await axios.get(`${apiUrl}/getUserDataForChat/${searchQuery}`)
+    await ApiConnector.get(`/getUserDataForChat/${searchQuery}`)
       .then((res)=>{
         setChatUsers(res?.data?.result);
       })

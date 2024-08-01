@@ -9,6 +9,7 @@ import Button from "@mui/material/Button";
 import {io} from "socket.io-client";
 import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import CircularProgress from '@mui/material/CircularProgress';
+import ApiConnector from "../services/ApiConnector";
 
 const Main = () => {
   const apiUrl = process.env.REACT_APP_MAIN_URL;
@@ -57,8 +58,7 @@ useEffect(() => {
 
   const getUserDataForChatById = async (id) => {
     setChatId(id);
-    await axios
-      .get(`${apiUrl}/getUserDataForChatById/${id}`)
+    await ApiConnector.get(`/getUserDataForChatById/${id}`)
       .then((res) => {
         setChatUser(res?.data?.result);
       })
@@ -84,7 +84,7 @@ useEffect(() => {
       receiverId:chatId
     }
 
-    await axios.post(`${apiUrl}/createChat`, payload)
+    await ApiConnector.post(`/createChat`, payload)
       .then((res)=>{
         // socket.emit("message", myMessage)
         socketRef.current.emit("message", myMessage);
@@ -104,7 +104,7 @@ useEffect(() => {
   // ==================================receive chats datas ================================
 
   const receiveChats = async ()=>{
-    await axios.get(`${apiUrl}/receiveChats/userId=${userobject?.id}/receiverId=${chatId}`,)
+    await ApiConnector.get(`/receiveChats/userId=${userobject?.id}/receiverId=${chatId}`,)
     .then((res)=>{
       setReceivedChats(res?.data?.result)
     })
@@ -123,7 +123,7 @@ useEffect(()=>{
       imageFile:e.target.files[0]
     }
     setLoader(true)
-    await axios.post(`${apiUrl}/imageUpload`, payload, {
+    await ApiConnector.post(`/imageUpload`, payload, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

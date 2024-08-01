@@ -71,7 +71,7 @@ const Login = () => {
           </div>
           <div className="w-full md:w-[50%] p-10">
             <form
-              className="border rounded-lg p-5 bg-slate-100"
+              className="border rounded-lg p-5 shadow-2xl shadow-indigo-200 bg-slate-100"
               onSubmit={login}
             >
               <div className="flex gap-2 flex-col justify-center items-center">
@@ -117,7 +117,7 @@ const Login = () => {
                   onClick={handleClickOpen}
                   sx={{ margin: "0.5rem", padding: "0.5rem" }}
                 >
-                  Create New Create
+                  Create New Account
                 </Button>
               </div>
             </form>
