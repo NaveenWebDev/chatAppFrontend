@@ -28,7 +28,7 @@ const Main = () => {
 
 useEffect(() => {
     // socket connection
-    socketRef.current = io(`http://localhost:4000`, {
+    socketRef.current = io(`https://chatappbackend-33tk.onrender.com`, {
       credentials: true,
     });
 
