@@ -54,12 +54,12 @@ const Main = () => {
 
   useEffect(() => {
     // socket connection
-    // socketRef.current = io(`https://chatappbackend-33tk.onrender.com`, {
-    //   credentials: true,
-    // });
-    socketRef.current = io(`http://localhost:4000`, {
+    socketRef.current = io(`https://chatappbackend-33tk.onrender.com`, {
       credentials: true,
     });
+    // socketRef.current = io(`http://localhost:4000`, {
+    //   credentials: true,
+    // });
 
     socketRef.current.on("connect", () => {
       console.log("Socket connected: ", socketRef.current.id);
@@ -231,7 +231,12 @@ const Main = () => {
         getGroupMessages(groupId)
       })
       .catch((err)=>{
-        console.log(err)
+        Swal.fire({
+          icon: "error",
+          title: "Please add yourself in this group",
+          text: err.response.data.message
+        });
+        console.log(err.response.data.message)
       })
   }
   const getGroupMessages = async (id)=>{

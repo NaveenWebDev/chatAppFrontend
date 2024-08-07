@@ -21,7 +21,7 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Swal from "sweetalert2";
 
-const Users = ({ getUserDataForChatById, receiveChats , setGroupId, setChatId , chatUsersData }) => {
+const Users = ({ getUserDataForChatById, receiveChats , setGroupId, setChatId , chatUsersData,}) => {
   const apiUrl = process.env.REACT_APP_MAIN_URL;
   const [searchQuery, setSearchQuery] = useState("all");
   const [chatUsers, setChatUsers] = useState([]);
@@ -60,7 +60,7 @@ const Users = ({ getUserDataForChatById, receiveChats , setGroupId, setChatId , 
 
   const createGroup = async () => {
     await ApiConnector.post(`/createGroup/${groupName}`)
-      .then((res) => {
+      .then(async(res) => {
         Swal.fire({
           title: "Good job!",
           text: "Group Created Successfully",
