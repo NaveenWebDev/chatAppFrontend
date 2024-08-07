@@ -21,7 +21,7 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Swal from "sweetalert2";
 
-const Users = ({ getUserDataForChatById, receiveChats , setGroupId, setChatId , chatUsersData,}) => {
+const Users = ({ getUserDataForChatById, receiveChats , setGroupId, setChatId , chatUsersData, userId}) => {
   const apiUrl = process.env.REACT_APP_MAIN_URL;
   const [searchQuery, setSearchQuery] = useState("all");
   const [chatUsers, setChatUsers] = useState([]);
@@ -59,7 +59,7 @@ const Users = ({ getUserDataForChatById, receiveChats , setGroupId, setChatId , 
   };
 
   const createGroup = async () => {
-    await ApiConnector.post(`/createGroup/${groupName}`)
+    await ApiConnector.post(`/createGroup/${groupName}/${userId}`)
       .then(async(res) => {
         Swal.fire({
           title: "Good job!",
@@ -71,7 +71,7 @@ const Users = ({ getUserDataForChatById, receiveChats , setGroupId, setChatId , 
         handleClose()
       })
       .catch((err) => {
-        console.log(err.message);
+        console.log(err);
       });
   };
 
@@ -81,7 +81,7 @@ const Users = ({ getUserDataForChatById, receiveChats , setGroupId, setChatId , 
         setGroups(res?.data?.result)
       })
       .catch((err) => {
-        console.log(err.message);
+        console.log(err);
       });
   };
 

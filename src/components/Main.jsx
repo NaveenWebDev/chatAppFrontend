@@ -274,7 +274,7 @@ const Main = () => {
         console.log("something went wrong")
       })
   }
-
+  console.log(chatGroup)
   return (
     <main className="bg-gray-700 h-screen">
       <div className="max-w-[1200px] w-[90%] m-auto">
@@ -286,6 +286,7 @@ const Main = () => {
               receiveChats={receiveChats}
               setGroupId={setGroupId}
               chatUsersData={chatUsersData}
+              userId={userobject?.id}
             />
           </div>
 
@@ -316,7 +317,11 @@ const Main = () => {
                         <p>you and other's</p>
                       </div>
                     </div>
+                    {
+                      user?.userId == userobject?.id ?
                 <Button sx={{color:"white"}} onClick={handleClickOpen}>Add Member</Button>
+                :null
+                    }
                     </>
                   ))}
 
