@@ -21,7 +21,7 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Swal from "sweetalert2";
 
-const Users = ({ getUserDataForChatById, receiveChats , setGroupId, setChatId }) => {
+const Users = ({ getUserDataForChatById, receiveChats , setGroupId, setChatId , chatUsersData }) => {
   const apiUrl = process.env.REACT_APP_MAIN_URL;
   const [searchQuery, setSearchQuery] = useState("all");
   const [chatUsers, setChatUsers] = useState([]);
@@ -30,6 +30,8 @@ const Users = ({ getUserDataForChatById, receiveChats , setGroupId, setChatId })
   const [groupName, setGroupName] = React.useState('');
   const { userobject } = useContext(GlobalUserData);
   const [groups, setGroups] = React.useState([]);
+
+  
   
 
   const handleChange = (event, newValue) => {
@@ -42,12 +44,14 @@ const Users = ({ getUserDataForChatById, receiveChats , setGroupId, setChatId })
 
   const handleClose = () => {
     setOpen(false);
+    setGroupName("")
   };
 
   const getUserDataForChat = async () => {
     await ApiConnector.get(`/getUserDataForChat/${searchQuery}`)
       .then((res) => {
         setChatUsers(res?.data?.result);
+        chatUsersData(res?.data?.result);
       })
       .catch((err) => {
         console.log(err.message);
@@ -158,7 +162,7 @@ const Users = ({ getUserDataForChatById, receiveChats , setGroupId, setChatId })
           </TabPanel>
           <TabPanel value="2">
             <div>
-              <div className="bg-gray-500 flex justify-center items-center rounded-md">
+              {/* <div className="bg-gray-500 flex justify-center items-center rounded-md">
                 <InputBase
                   sx={{ ml: 1, flex: 1, color: "white", width: "100%" }}
                   placeholder="Search Group"
@@ -171,7 +175,7 @@ const Users = ({ getUserDataForChatById, receiveChats , setGroupId, setChatId })
                 >
                   <SearchIcon sx={{ color: "white" }} />
                 </IconButton>
-              </div>
+              </div> */}
 
               {/* ========================users========================= */}
 

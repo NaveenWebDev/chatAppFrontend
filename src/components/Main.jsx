@@ -11,6 +11,17 @@ import SpeedDialIcon from "@mui/material/SpeedDialIcon";
 import CircularProgress from "@mui/material/CircularProgress";
 import ApiConnector from "../services/ApiConnector";
 import Swal from "sweetalert2";
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Slide from '@mui/material/Slide';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 const Main = () => {
   const apiUrl = process.env.REACT_APP_MAIN_URL;
@@ -29,11 +40,24 @@ const Main = () => {
   const [online, setOnline] = useState(true);
   const [chatGroup, setChatGroup] = useState([]);
   const [myGroupMessage, setMyGroupMessage] = useState("");
+  const [receivedGroupChats, setReceivedGroupChats] = useState([]);
+  const [open, setOpen] = React.useState(false);
+  const [memberData,setMemberData] = useState([])
 
-  console.log(groupId);
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   useEffect(() => {
     // socket connection
-    socketRef.current = io(`https://chatappbackend-33tk.onrender.com`, {
+    // socketRef.current = io(`https://chatappbackend-33tk.onrender.com`, {
+    //   credentials: true,
+    // });
+    socketRef.current = io(`http://localhost:4000`, {
       credentials: true,
     });
 
@@ -42,6 +66,9 @@ const Main = () => {
     });
 
     socketRef.current.on("message", (data) => {
+      setSocketData(data);
+    });
+    socketRef.current.on("groupMessage", (data) => {
       setSocketData(data);
     });
 
@@ -145,7 +172,7 @@ const Main = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [socketData, receivedChats, myMessage]);
+  }, [socketData, receivedChats, myMessage, myGroupMessage, receivedGroupChats]);
   // ==================================receive chats datas ================================
 
   const receiveChats = async () => {
@@ -185,18 +212,61 @@ const Main = () => {
   };
 
   const sendGroupMessage = async ()=>{
+
+    if (myGroupMessage === "" && fileUrl === "") {
+      return;
+    }
+
     const payload = {
       groupId, 
       message : myGroupMessage ,
       userId :userobject?.id,
+      userName :userobject?.userName,
     }
-    await ApiConnector.post(`/sendGroupMessage/`, payload)
+    await ApiConnector.post(`/sendGroupMessage`, payload)
       .then((res)=>{
-        console.log("message Send on Group")
+        // console.log("message Send on Group")
+        socketRef.current.emit("groupMessage", myGroupMessage);
         setMyGroupMessage("")
+        getGroupMessages(groupId)
       })
       .catch((err)=>{
         console.log(err)
+      })
+  }
+  const getGroupMessages = async (id)=>{
+
+    await ApiConnector.get(`/getGroupMessages/${id}`)
+      .then((res)=>{
+        setReceivedGroupChats(res?.data?.result)
+      })
+      .catch((err)=>{
+        console.log(err)
+      })
+  }
+
+  useEffect(()=>{
+    getGroupMessages(groupId)
+  },[groupId, socketData])
+
+
+  const chatUsersData = (data)=>{
+    setMemberData(data)
+  }
+
+  // ==========================addGroupMember============================
+
+  const addGroupMember = async (id)=>{
+    const payload = {
+      groupId,
+      userId: id,
+    }
+    await ApiConnector.post(`/addGroupMember`, payload)
+      .then((res)=>{
+        console.log("member added")
+      })
+      .catch((err)=>{
+        console.log("something went wrong")
       })
   }
 
@@ -210,6 +280,7 @@ const Main = () => {
               setChatId={setChatId}
               receiveChats={receiveChats}
               setGroupId={setGroupId}
+              chatUsersData={chatUsersData}
             />
           </div>
 
@@ -237,10 +308,10 @@ const Main = () => {
                       <Avatar alt="Remy Sharp" src={user?.imageUrl} />
                       <div>
                         <p>{user?.name}</p>
-                        <p>Online</p>
+                        <p>you and other's</p>
                       </div>
                     </div>
-                <Button sx={{color:"white"}}>Add Member</Button>
+                <Button sx={{color:"white"}} onClick={handleClickOpen}>Add Member</Button>
                     </>
                   ))}
 
@@ -274,7 +345,7 @@ const Main = () => {
                     </span>
                   ))}
 
-                  {/* {groupId && receivedChats.map((val, ind) => (
+                  {groupId && receivedGroupChats.map((val, ind) => (
                     <span
                       className={`flex flex-col gap-2 ${
                         val?.userId === userobject?.id ? "items-end" : null
@@ -287,16 +358,19 @@ const Main = () => {
                       />
 
                       <p
-                        className={`bg-gray-600 w-[40%] p-3 rounded-md ${
+                        className={`bg-gray-600 w-[40%] flex flex-col p-3 rounded-md ${
                           val?.userId === userobject?.id ? "bg-gray-800" : null
                         } `}
                       >
-                        {val?.chat}
+                    <span className="text-green-400">{val?.userName}</span>
+                    <span>
+                        {val?.message}
+                    </span>
 
                         <div ref={chatEndRef} />
                       </p>
                     </span>
-                  ))} */}
+                  ))}
 
                 </div>
 
@@ -343,7 +417,7 @@ const Main = () => {
                       value={myGroupMessage}
                       onChange={(e)=>setMyGroupMessage(e.target.value)}
                     />
-                    <span className="bg-[#1976D2] mx-1 rounded-full cursor-pointer grid place-items-center h-[50px] w-[70px] relative text-white">
+                    {/* <span className="bg-[#1976D2] mx-1 rounded-full cursor-pointer grid place-items-center h-[50px] w-[70px] relative text-white">
                       <input
                         type="file"
                         name="file"
@@ -351,7 +425,7 @@ const Main = () => {
                         // onChange={(e) => uploadFile(e)}
                       />
                       <SpeedDialIcon className="cursor-pointer" />
-                    </span>
+                    </span> */}
                     {loader ? (
                       <CircularProgress sx={{ color: "white" }} />
                     ) : (
@@ -382,6 +456,38 @@ const Main = () => {
           )}
         </div>
       </div>
+      <Dialog
+        open={open}
+        TransitionComponent={Transition}
+        keepMounted
+        onClose={handleClose}
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle sx={{textAlign:"center"}}>{"Add Members"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+          {
+          memberData.map((val, i)=>(
+          <div className="flex justify-between items-center gap-2 border my-3 p-2 rounded-md" key={val?.id} >
+                    <div className="flex gap-2">
+                      <Avatar alt="Remy Sharp" src={val?.imageUrl} />
+                      <div>
+                        <p>{val?.userName}</p>
+                        <p>member</p>
+                      </div>
+                    </div>
+
+                       <AddCircleIcon sx={{cursor:"pointer"}} onClick={()=>addGroupMember(val?.id)} />
+                    </div>
+          ))
+          }
+
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>cancel</Button>
+        </DialogActions>
+      </Dialog>
     </main>
   );
 };
