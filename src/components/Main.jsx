@@ -24,6 +24,7 @@ const Main = () => {
   const chatEndRef = useRef(null);
   const socketRef = useRef();
   const [loader, setLoader] = useState(false)
+  const [online, setOnline] = useState(true);
 
 
 useEffect(() => {
@@ -48,6 +49,25 @@ useEffect(() => {
       socketRef.current.disconnect();
     };
   }, []);
+
+  useEffect(()=>{
+
+    const handleOnline = ()=>{
+      setOnline(true)
+    }
+    const handleOfline = ()=>{
+      setOnline(false)
+    }
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOfline);
+    
+    return ()=> {
+      window.addEventListener("online", handleOnline);
+      window.addEventListener("offline", handleOfline);
+    };
+
+  },[])
   
   const logout = () => {
     localStorage.removeItem("token");
@@ -210,10 +230,14 @@ useEffect(()=>{
           ) : (
             <div className="h-full w-[70%] flex justify-between items-center rounded-lg p-5">
               <p
-                className="flex justify-center bg-gray-500 rounded-lg text-5xl text-white w-full h-full items-center"
+                className="flex justify-center bg-gray-500 rounded-lg text-5xl text-white w-full h-full items-center text-center"
                 style={{ textShadow: "0 0 20px" }}
               >
-                Welcome to our chat Applicaton
+              {
+                online === true? 
+                "Welcome to our chat Applicaton ": "Please check your internet Connection you are ofline"
+
+              }
               </p>
             </div>
           )}

@@ -9,10 +9,9 @@ const GlobalUserData = createContext();
 const App = () => {
   let storedToken = localStorage.getItem("token");
   let userDatas = localStorage.getItem("userData");
-
   const [token, setToken ] = useState(storedToken);
   const [userData, setUserData] = useState(userDatas);
-  
+
   const navigate = useNavigate()
   
   const checkLoginOrNot = ()=>{
@@ -31,6 +30,7 @@ const App = () => {
   },[token])
 
   const userobject = JSON.parse(userData)
+
 
 
   return (
